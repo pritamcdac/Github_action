@@ -40,7 +40,7 @@ on:
 
   schedule:
 
-    - cron: '0 0 * * *'  # This will trigger at midnight UTC every day
+    - cron: '* * * * *'  # This will trigger at midnight UTC every day
  
 jobs:
 
