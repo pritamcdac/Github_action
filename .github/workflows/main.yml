@@ -79,12 +79,11 @@ jobs:
       # Triggered by a pull request to the main branch
 
       - name: Echo on pull request to main
-
+     
         if: github.event_name == 'pull_request' && github.ref == 'refs/heads/master'
-
         run: |
-
           echo "This is a pull request event to the main branch!"
+
  
       # Triggered when an issue comment is created
 
