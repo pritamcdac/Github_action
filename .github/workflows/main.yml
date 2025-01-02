@@ -22,7 +22,7 @@ on:
 
     branches:
 
-      - master
+      - main
  
   # Trigger the workflow on issue comment event
 
