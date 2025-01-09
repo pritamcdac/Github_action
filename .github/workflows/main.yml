@@ -132,8 +132,8 @@ on:
       name:
         description: 'Name to greet'
         required: false
-        default: 'World'
-  schedule:              # Scheduled trigger (daily at midnight UTC)
+        default: 'Pritam'
+  schedule:              # Scheduled trigger (every minute for testing)
     - cron: '* * * * *'
   check_run:             # Trigger for specific webhook events
     types:
@@ -142,22 +142,24 @@ on:
 
 jobs:
   greeting:
-    if: ${{ github.event_name == 'workflow_dispatch' }} # Run only for manual triggers
+    if: ${{ github.event_name == 'workflow_dispatch' }}  # Run only for manual triggers
     runs-on: ubuntu-latest
     steps:
       - name: Print Greeting
         run: echo "Hello, ${{ github.event.inputs.name }}!"
 
   schedule-log:
-    if: ${{ github.event_name == 'schedule' }} # Run only for scheduled events
+    if: ${{ github.event_name == 'schedule' }}  # Run only for scheduled events
     runs-on: ubuntu-latest
     steps:
       - name: Print Schedule Message
         run: echo "Scheduled workflow executed on $(date)."
 
   webhook-log:
-    if: ${{ github.event_name == 'check_run' }} # Run only for webhook events
+    if: ${{ github.event_name == 'check_run' }}  # Run only for webhook events
     runs-on: ubuntu-latest
     steps:
       - name: Print Webhook Event
-        run: echo "Triggered by webhook event: ${{ github.event_name }}"
+        run: |
+          echo "Triggered by webhook event: ${{ github.event_name }}"
+
