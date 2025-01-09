@@ -119,62 +119,33 @@
 name: Events Trigger Workflow
 
 on:
-  push:                  # Trigger on push events
-    branches:
-      - master
-  pull_request:          # Trigger on pull request events
-    types:
-      - opened
-      - synchronize
-      - reopened
-  workflow_dispatch:     # Manual trigger
+  workflow_dispatch: # Manual trigger for testing
     inputs:
       name:
-        description: 'Name to greet'
+        description: 'Name of the check run'
         required: false
-        default: 'Pritam'
-  schedule:              # Scheduled trigger (every minute for testing)
-    - cron: '* * * * *'
-  check_run:             # Trigger for specific webhook events
-    types:
-      - created
-      - completed
+        default: 'Manual Check Run'
 
 jobs:
-  greeting:
-    if: ${{ github.event_name == 'workflow_dispatch' }}  # Run only for manual triggers
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print Greeting
-        run: echo "Hello, ${{ github.event.inputs.name }}!"
-
-  schedule-log:
-    if: ${{ github.event_name == 'schedule' }}  # Run only for scheduled events
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print Schedule Message
-        run: echo "Scheduled workflow executed on $(date)."
-
   create-check-run:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
       - name: Create a Check Run
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const checkRun = await github.checks.create({
+            const response = await github.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              name: "CI Check", // Name of the check
-              head_sha: context.sha, // The commit SHA this check corresponds to
+              name: "${{ github.event.inputs.name }}", // Name of the check run
+              head_sha: context.sha, // Commit SHA for the check run
               status: "in_progress", // Initial status of the check
+              started_at: new Date().toISOString() // Start time for the check
             });
-            console.log('Check run created:', checkRun.data.id);
 
-  webhook-log:
-    if: ${{ github.event_name == 'check_run' }}  # Run only for webhook events
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print Webhook Event
-        run: |
-          echo "Triggered by webhook event: ${{ github.event_name }}"
+            core.info(`Check Run Created: ID=${response.data.id}`);
+
