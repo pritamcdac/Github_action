@@ -158,15 +158,23 @@ jobs:
   create-check-run:
     runs-on: ubuntu-latest
     steps:
-      - name: Create a check run
+      - name: Create a Check Run
         uses: actions/github-script@v6
         with:
           script: |
             const checkRun = await github.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              name: "CI Check",  # Name of the check
-              head_sha: context.sha,  # The commit SHA this check corresponds to
-              status: "in_progress",  # The initial status of the check
+              name: "CI Check", // Name of the check
+              head_sha: context.sha, // The commit SHA this check corresponds to
+              status: "in_progress", // Initial status of the check
             });
-            console.log('Check run created:', checkRun);
+            console.log('Check run created:', checkRun.data.id);
+
+  webhook-log:
+    if: ${{ github.event_name == 'check_run' }}  # Run only for webhook events
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Webhook Event
+        run: |
+          echo "Triggered by webhook event: ${{ github.event_name }}"
