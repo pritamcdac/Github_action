@@ -1,117 +1,158 @@
-name: Event-Based Workflow
+# name: Event-Based Workflow
  
-on:
+# on:
 
-  # Trigger the workflow on push to the main branch
+#   # Trigger the workflow on push to the main branch
 
-  push:
+#   push:
 
-    branches:
+#     branches:
 
-      - master
+#       - master
 
-    # Trigger on any tag push
+#     # Trigger on any tag push
 
-    tags:
+#     tags:
 
-      - 'v*'  # Triggers on any tag starting with 'v' (e.g., v1.0.0)
+#       - 'v*'  # Triggers on any tag starting with 'v' (e.g., v1.0.0)
  
-  # Trigger the workflow on a pull request to the main branch
+#   # Trigger the workflow on a pull request to the main branch
 
-  pull_request:
+#   pull_request:
 
-    branches:
+#     branches:
 
-      - master
+#       - master
  
-  # Trigger the workflow on issue comment event
+#   # Trigger the workflow on issue comment event
 
-  issue_comment:
+#   issue_comment:
 
-    types: [created]
+#     types: [created]
  
-  # Trigger the workflow on a release event
+#   # Trigger the workflow on a release event
 
-  release:
+#   release:
 
-    types: [created]
+#     types: [created]
  
-  # Trigger the workflow on a cron schedule (runs every day at midnight UTC)
+#   # Trigger the workflow on a cron schedule (runs every day at midnight UTC)
 
-  schedule:
+#   schedule:
 
-    - cron: '* * * * *'  # This will trigger at midnight UTC every day
+#     - cron: '* * * * *'  # This will trigger at midnight UTC every day
  
-jobs:
+# jobs:
 
-  run_echo_commands:
+#   run_echo_commands:
 
-    runs-on: ubuntu-latest
+#     runs-on: ubuntu-latest
  
-    steps:
+#     steps:
 
-      # Checkout the code
+#       # Checkout the code
 
-      - name: Checkout code
+#       - name: Checkout code
 
-        uses: actions/checkout@v3
+#         uses: actions/checkout@v3
  
-      # Triggered by a push to the main branch
+#       # Triggered by a push to the main branch
 
-      - name: Echo on push to main
+#       - name: Echo on push to main
 
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+#         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
 
-        run: |
+#         run: |
 
-          echo "This is a push event to the main branch!"
+#           echo "This is a push event to the main branch!"
  
-      # Triggered by a push event for a tag (e.g., v1.0.0)
+#       # Triggered by a push event for a tag (e.g., v1.0.0)
 
-      - name: Echo on tag push
+#       - name: Echo on tag push
 
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+#         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
 
-        run: |
+#         run: |
 
-          echo "A new tag was pushed: ${{ github.ref }}"
+#           echo "A new tag was pushed: ${{ github.ref }}"
  
-      # Triggered by a pull request to the main branch
+#       # Triggered by a pull request to the main branch
 
-      - name: Echo on pull request to main
+#       - name: Echo on pull request to main
      
-        if: github.event_name == 'pull_request' && github.ref == 'refs/heads/master'
-        run: |
-          echo "This is a pull request event to the main branch!"
+#         if: github.event_name == 'pull_request' && github.ref == 'refs/heads/master'
+#         run: |
+#           echo "This is a pull request event to the main branch!"
 
  
-      # Triggered when an issue comment is created
+#       # Triggered when an issue comment is created
 
-      - name: Echo on issue comment
+#       - name: Echo on issue comment
 
-        if: github.event_name == 'issue_comment' && github.event.action == 'created'
+#         if: github.event_name == 'issue_comment' && github.event.action == 'created'
 
-        run: |
+#         run: |
 
-          echo "An issue comment was created: ${{ github.event.comment.body }}"
+#           echo "An issue comment was created: ${{ github.event.comment.body }}"
  
-      # Triggered when a release is created
+#       # Triggered when a release is created
 
-      - name: Echo on release creation
+#       - name: Echo on release creation
 
-        if: github.event_name == 'release' && github.event.action == 'created'
+#         if: github.event_name == 'release' && github.event.action == 'created'
 
-        run: |
+#         run: |
 
-          echo "A new release was created with the tag: ${{ github.event.release.tag_name }}"
+#           echo "A new release was created with the tag: ${{ github.event.release.tag_name }}"
  
-      # Triggered by a scheduled cron event (daily at midnight UTC)
+#       # Triggered by a scheduled cron event (daily at midnight UTC)
 
-      - name: Echo on cron event
+#       - name: Echo on cron event
 
-        if: github.event_name == 'schedule'
+#         if: github.event_name == 'schedule'
 
+#         run: |
+
+#           echo "This is a scheduled event triggered by the cron schedule!"
+
+
+name: Multiple Workflow
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      trigger_type:
+        description: 'Type of manual trigger'
+        required: false
+        default: 'manual_run'
+  schedule:
+    - cron: '* * * * *'  # Daily at 6:00 AM UTC
+
+jobs:
+  unified-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Identify event
+        run: echo "Triggered by ${{ github.event_name }}"
+
+      - name: Conditionally process
         run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "Building for push event on branch ${{ github.ref_name }}"
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "Triggered for PR #${{ github.event.pull_request.number }}"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "Manual trigger: ${{ github.event.inputs.trigger_type }}"
+          elif [[ "${{ github.event_name }}" == "schedule" ]]; then
+            echo "Scheduled workflow run"
+          fi
 
-          echo "This is a scheduled event triggered by the cron schedule!"
- 
