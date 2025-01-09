@@ -134,7 +134,7 @@ on:
         required: false
         default: 'Pritam'
   schedule:              # Scheduled trigger (every minute for testing)
-    - cron: '*/ 1* * * *'
+    - cron: '* * * * *'
   check_run:             # Trigger for specific webhook events
     types:
       - created
