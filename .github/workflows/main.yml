@@ -116,7 +116,7 @@
 #           echo "This is a scheduled event triggered by the cron schedule!"
 
 
-name: Event Trigger Workflow
+name: Events Trigger Workflow
 
 on:
   push:                  # Trigger on push events
