@@ -25,7 +25,8 @@ on:
         default: 'Pritam'
 
 jobs:
-  run_echo_commands:
+  run_master_job:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
 
     steps:
@@ -35,85 +36,75 @@ jobs:
 
       # Triggered by a push to the master branch
       - name: Echo on push to master
-        if: github.event_name == 'push' && github.base_ref == 'master'
         run: |
           echo "This is a push event to the master branch!"
 
-      # Triggered by a tag push
-      - name: Echo on tag push
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-        run: |
-          echo "A new tag was pushed: ${{ github.ref }}"
+  run_pull_request_job:
+    if: github.event_name == 'pull_request' && github.base_ref == 'master'
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       # Triggered by a pull request to master
       - name: Echo on pull request to master
-        if: github.event_name == 'pull_request' && github.base_ref == 'master'
         run: |
           echo "This is a pull request event to the master branch!"
 
+  run_tag_push:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Triggered by a tag push
+      - name: Echo on tag push
+        run: |
+          echo "A new tag was pushed: ${{ github.ref }}"
+
+  run_issue_comment:
+    if: github.event_name == 'issue_comment' && github.event.action == 'created'
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       # Triggered when an issue comment is created
       - name: Echo on issue comment
-        if: github.event_name == 'issue_comment' && github.event.action == 'created'
         run: |
           echo "An issue comment was created: ${{ github.event.comment.body }}"
 
+  run_release_creation:
+    if: github.event_name == 'release' && github.event.action == 'created'
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       # Triggered when a release is created
       - name: Echo on release creation
-        if: github.event_name == 'release' && github.event.action == 'created'
         run: |
           echo "A new release was created with the tag: ${{ github.event.release.tag_name }}"
 
+  run_manual_dispatch:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       # Triggered manually with workflow_dispatch
       - name: Echo on manual dispatch
-        if: github.event_name == 'workflow_dispatch'
         run: |
           echo "Hello, ${{ github.event.inputs.name }}! This is a manual trigger of the workflow."
-
-
-
-# name: Events Trigger Workflow
-
-# on:
-#   push:                  # Trigger on push events
-#     branches:
-#       - master
-#   pull_request:          # Trigger on pull request events
-#     types:
-#       - opened
-#       - synchronize
-#       - reopened
-#   workflow_dispatch:     # Manual trigger
-#     inputs:
-#       name:
-#         description: 'Name to greet'
-#         required: false
-#         default: 'Pritam'
-#   schedule:              # Scheduled trigger (every minute for testing)
-#     - cron: '* * * * *'
-#   check_run:             # Trigger for specific webhook events
-#     types:
-#       - created
-#       - completed
-
-# jobs:
-#   greeting:
-#     if: ${{ github.event_name == 'workflow_dispatch' }}  # Run only for manual triggers
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Print Greeting
-#         run: echo "Hello, ${{ github.event.inputs.name }}!"
-
-#   schedule-log:
-#     if: ${{ github.event_name == 'schedule' }}  # Run only for scheduled events
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Print Schedule Message
-#         run: echo "Scheduled workflow executed on $(date)."
-
-#   webhook-log:
-#     if: ${{ github.event_name == 'check_run' }}  # Run only for webhook events
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Print Webhook Event
-#         run: |
-#           echo "Triggered by webhook event: ${{ github.event_name }}"
