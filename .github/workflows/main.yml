@@ -35,7 +35,7 @@ jobs:
 
       # Triggered by a push to the master branch
       - name: Echo on push to master
-        if: github.event_name == 'push' && github.ref == 'master'
+        if: github.event_name == 'push' && github.base_ref == 'master'
         run: |
           echo "This is a push event to the master branch!"
 
@@ -47,7 +47,7 @@ jobs:
 
       # Triggered by a pull request to master
       - name: Echo on pull request to master
-        if: github.event_name == 'pull_request' && github.ref == 'master'
+        if: github.event_name == 'pull_request' && github.base_ref == 'master'
         run: |
           echo "This is a pull request event to the master branch!"
 
